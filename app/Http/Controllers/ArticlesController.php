@@ -12,16 +12,14 @@ class ArticlesController extends Controller
         // Render a list of the resource
 
         $articles = Article::latest()->get();
-        return view('articles.index', ['articles' => $articles]);
+        return view('articles.index', $articles);
     }
 
-    public function show($articleId){
+    public function show(Article $article){
 
         // Render a single resource
 
-        $article = Article::find($articleId);
-
-        return view('articles.show', ['article' => $article]);
+        return view('articles.show', $article);
     }
 
     public function create(){
@@ -36,48 +34,27 @@ class ArticlesController extends Controller
 
         // Save/persist a new resource
 
-        request()->validate([
-            'title'=>'required',
-            'excerpt'=>'required',
-            'body'=>'required'
-        ]);
+        Article::create($this->validateArticle());
 
-        $article = new Article();
-        $article->title = request('title');
-        $article->excerpt = request('excerpt');
-        $article->body = request('body');
-        $article->save();
-
-        return redirect('/articles');
+        return redirect(route('articles.index'));
 
     }
 
-    public function edit($id){
+    public function edit(Article $article){
 
         // Render a view to change the contents of a resource
 
-        $article = Article::find($id);
-        return view('articles.edit', ['article'=>$article]);
+        return view('articles.edit', compact('article'));
 
     }
 
-    public function update($id){
+    public function update(Article $article){
 
         // Save/persist the edited contents of a resource
 
-        request()->validate([
-            'title'=>'required',
-            'excerpt'=>'required',
-            'body'=>'required'
-        ]);
+        $article->update($this->validateArticle());
 
-        $article = Article::find($id);
-        $article->title = request('title');
-        $article->excerpt = request('excerpt');
-        $article->body = request('body');
-        $article->save();
-
-        return redirect('/articles');
+        return redirect(route('articles.show', $article));
 
     }
 
@@ -85,5 +62,17 @@ class ArticlesController extends Controller
 
         // Delete an instance of a resource
 
+    }
+
+    /**
+     * @return array
+     */
+    public function validateArticle(): array
+    {
+        return request()->validate([
+            'title' => 'required',
+            'excerpt' => 'required',
+            'body' => 'required'
+        ]);
     }
 }
